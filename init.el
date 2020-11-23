@@ -181,4 +181,4 @@
 
        :config
        ;;literate
-       (default +bindings +smarkparen))
+       (default +bindings +smartparen))
