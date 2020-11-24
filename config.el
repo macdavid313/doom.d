@@ -275,3 +275,13 @@
 (add-to-list 'auto-mode-alist '("\\.ss\\'"  . scheme-mode))
 (add-to-list 'auto-mode-alist '("\\.scm\\'" . scheme-mode))
 (add-to-list 'auto-mode-alist '("\\.rkt\\'" . scheme-mode))
+
+;;;; IRC Chat
+(after! circe
+  (set-irc-server! "chat.freenode.net"
+                   `(:tls t
+                     :port 6697
+                     :nick "macdavid313"
+                     :sasl-username "macdavid313"
+                     :sasl-password ,(+pass-get-secret "irc/freenode.net")
+                     :channels ("#lisp"))))
