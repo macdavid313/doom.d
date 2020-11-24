@@ -25,7 +25,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-vibrant)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -53,6 +53,8 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+(add-hook 'lisp-mode-hook #'rainbow-delimiters-mode)
+
 ;;; Common Lisp - Slime
 (when (getenv "CL_DOCUMENTATION")
   (let* ((root (file-name-as-directory (getenv "CL_DOCUMENTATION")))
@@ -72,7 +74,6 @@
 
     (setq common-lisp-hyperspec-root (concat "file://" hyperspec-root))))
 
-
 (defun sbcl-doc ()
   "Quickly access SBCL Manual"
   (interactive)
@@ -81,27 +82,32 @@
 (use-package! slime
   :init
   (after! lisp-mode
-    (set-repl-handler! 'lisp-mode #'slime-mrepl)
+    (set-repl-handler! 'lisp-mode #'slime-repl)
     (set-eval-handler! 'lisp-mode #'slime-eval-region)
     (set-lookup-handlers! 'lisp-mode
       :definition #'slime-edit-definition
       :documentation #'slime-describe-symbol))
   :config
-  ;; package.el compiles the contrib subdir, but the compilation order
-  ;; causes problems, so we remove the .elc files there. See
-  ;; http://lists.common-lisp.net/pipermail/slime-devel/2012-February/018470.html
-  (mapc #'delete-file
-        (file-expand-wildcards (concat user-emacs-directory "elpa/slime-2*/contrib/*.elc")))
-
   (setq slime-contribs
         '(slime-fancy slime-fuzzy slime-asdf slime-banner slime-company
                       slime-xref-browser slime-highlight-edits slime-scratch
                       slime-trace-dialog slime-mdot-fu))
 
-  (setf slime-default-lisp 'sbcl)
+  (setf slime-repl-history-file (concat doom-cache-dir "slime-repl-history")
+        slime-kill-without-query-p t
+        slime-default-lisp 'sbcl
+        slime-protocol-version 'ignore
+        slime-net-coding-system 'utf-8-unix)
+  ;; slime-completion-at-point-functions 'slime-simple-completions)
 
-  (setq slime-protocol-version 'ignore)
-  (setq slime-net-coding-system 'utf-8-unix)
+  (set-popup-rules!
+    '(("^\\*slime-repl"       :vslot 2 :size 0.3 :quit nil :ttl nil)
+      ("^\\*slime-compilation" :vslot 3 :ttl nil)
+      ("^\\*slime-traces"      :vslot 4 :ttl nil)
+      ("^\\*slime-description" :vslot 5 :size 0.3 :ttl 0)
+      ;; Do not display debugger or inspector buffers in a popup window. These
+      ;; buffers are meant to be displayed with sufficient vertical space.
+      ("^\\*slime-\\(?:db\\|inspector\\)" :ignore t)))
 
   (let ((quicklisp-path (concat (file-name-as-directory (concat (file-name-as-directory (getenv "HOME"))  "quicklisp"))
                                 "setup.lisp"))
@@ -169,7 +175,82 @@
                               (unless (featurep 'slime)
                                 (require 'slime)
                                 (normal-mode))))
-  )
+
+  (map! (:map slime-db-mode-map
+         :n "gr" #'slime-db-restart-frame)
+        (:map slime-inspector-mode-map
+         :n "gb" #'slime-inspector-pop
+         :n "gr" #'slime-inspector-reinspect
+         :n "gR" #'slime-inspector-fetch-all
+         :n "K"  #'slime-inspector-describe-inspectee)
+        (:map slime-xref-mode-map
+         :n "gr" #'slime-recompile-xref
+         :n "gR" #'slime-recompile-all-xrefs)
+        (:map lisp-mode-map
+         :n "gb" #'slime-pop-find-definition-stack)
+
+        (:localleader
+         :map lisp-mode-map
+         :desc "slime"          "'" #'slime
+         :desc "slime (ask)"    ";" (cmd!! #'slime '-)
+         :desc "Expand macro" "m" #'macrostep-expand
+         (:prefix ("c" . "compile")
+          :desc "Compile file"          "c" #'slime-compile-file
+          :desc "Compile/load file"     "C" #'slime-compile-and-load-file
+          :desc "Compile toplevel form" "f" #'slime-compile-defun
+          :desc "Load file"             "l" #'slime-load-file
+          :desc "Remove notes"          "n" #'slime-remove-notes
+          :desc "Compile region"        "r" #'slime-compile-region)
+         (:prefix ("e" . "evaluate")
+          :desc "Evaluate buffer"     "b" #'slime-eval-buffer
+          :desc "Evaluate last"       "e" #'slime-eval-last-expression
+          :desc "Evaluate/print last" "E" #'slime-eval-print-last-expression
+          :desc "Evaluate defun"      "f" #'slime-eval-defun
+          :desc "Undefine function"   "F" #'slime-undefine-function
+          :desc "Evaluate region"     "r" #'slime-eval-region)
+         (:prefix ("g" . "goto")
+          :desc "Go back"              "b" #'slime-pop-find-definition-stack
+          :desc "Go to"                "d" #'slime-edit-definition
+          :desc "Go to (other window)" "D" #'slime-edit-definition-other-window
+          :desc "Next note"            "n" #'slime-next-note
+          :desc "Previous note"        "N" #'slime-previous-note
+          :desc "Next sticker"         "s" #'slime-stickers-next-sticker
+          :desc "Previous sticker"     "S" #'slime-stickers-prev-sticker)
+         (:prefix ("h" . "help")
+          :desc "Who calls"               "<" #'slime-who-calls
+          :desc "Calls who"               ">" #'slime-calls-who
+          :desc "Lookup format directive" "~" #'hyperspec-lookup-format
+          :desc "Lookup reader macro"     "#" #'hyperspec-lookup-reader-macro
+          :desc "Apropos"                 "a" #'slime-apropos
+          :desc "Who binds"               "b" #'slime-who-binds
+          :desc "Disassemble symbol"      "d" #'slime-disassemble-symbol
+          :desc "Describe symbol"         "h" #'slime-describe-symbol
+          :desc "HyperSpec lookup"        "H" #'slime-hyperspec-lookup
+          :desc "Who macro-expands"       "m" #'slime-who-macroexpands
+          :desc "Apropos package"         "p" #'slime-apropos-package
+          :desc "Who references"          "r" #'slime-who-references
+          :desc "Who specializes"         "s" #'slime-who-specializes
+          :desc "Who sets"                "S" #'slime-who-sets)
+         (:prefix ("r" . "repl")
+          :desc "Clear REPL"         "c" #'slime-repl-clear-repl
+          :desc "Quit connection"    "q" #'slime-quit-lisp
+          :desc "Restart connection" "r" #'slime-restart-inferior-lisp
+          :desc "Sync REPL"          "s" #'slime-repl-sync)
+         (:prefix ("s" . "stickers")
+          :desc "Toggle breaking stickers" "b" #'slime-stickers-toggle-break-on-stickers
+          :desc "Clear defun stickers"     "c" #'slime-stickers-clear-defun-stickers
+          :desc "Clear buffer stickers"    "C" #'slime-stickers-clear-buffer-stickers
+          :desc "Fetch stickers"           "f" #'slime-stickers-fetch
+          :desc "Replay stickers"          "r" #'slime-stickers-replay
+          :desc "Add/remove sticker"       "s" #'slime-stickers-dwim)
+         (:prefix ("t" . "trace")
+          :desc "Toggle"         "t" #'slime-toggle-trace-fdefinition
+          :desc "Toggle (fancy)" "T" #'slime-toggle-fancy-trace
+          :desc "Untrace all"    "u" #'slime-untrace-all)))
+
+  (when (featurep! :editor evil +everywhere)
+    (add-hook 'slime-mode-hook #'evil-normalize-keymaps)))
+
 
 (use-package! slime-company
   :init (slime-setup '(slime-company))
