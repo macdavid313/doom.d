@@ -259,3 +259,19 @@
   (define-key company-active-map (kbd "\C-p") 'company-select-previous)
   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
   (define-key company-active-map (kbd "M-.") 'company-show-location))
+
+;;;; Scheme and Geiser
+(add-to-list 'auto-mode-alist '("\\.ss\\'"  . geiser-mode))
+(add-to-list 'auto-mode-alist '("\\.scm\\'" . geiser-mode))
+(add-to-list 'auto-mode-alist '("\\.rkt\\'" . geiser-mode))
+
+(let ((scheme (or (executable-find "scheme") (executable-find "chez"))))
+  (when scheme
+    (setq geiser-chez-binary scheme)))
+
+(setq geiser-repl-autodoc-p t
+      geiser-active-implementations '(chez))
+
+(add-to-list 'auto-mode-alist '("\\.ss\\'"  . scheme-mode))
+(add-to-list 'auto-mode-alist '("\\.scm\\'" . scheme-mode))
+(add-to-list 'auto-mode-alist '("\\.rkt\\'" . scheme-mode))
