@@ -54,9 +54,13 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(add-hook 'lisp-mode-hook #'rainbow-delimiters-mode)
+;;; Projectile
+(setq projectile-indexing-method 'alien)
+(setq projectile-sort-order 'recentf)
 
 ;;; Common Lisp - Slime
+(add-hook 'lisp-mode-hook #'rainbow-delimiters-mode)
+
 (when (getenv "CL_DOCUMENTATION")
   (let* ((root (file-name-as-directory (getenv "CL_DOCUMENTATION")))
          (acl-doc-root (file-name-as-directory (concat root "allegro")))
