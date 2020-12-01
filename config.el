@@ -114,52 +114,62 @@
       ;; buffers are meant to be displayed with sufficient vertical space.
       ("^\\*slime-\\(?:db\\|inspector\\)" :ignore t)))
 
-  (let ((quicklisp-path (concat (file-name-as-directory (concat (file-name-as-directory (getenv "HOME"))  "quicklisp"))
-                                "setup.lisp"))
-        (acl-path (file-name-as-directory (getenv "ACL_HOME")))
-        (acl-smp-path (file-name-as-directory (getenv "ACL_SMP_HOME")))
-        (agraph-client-path (getenv "AGRAPH_CLIENT"))
-        (agraph-smp-client-path (getenv "AGRAPH_SMP_CLIENT")))
+  (let* ((quicklisp-home (concat (file-name-as-directory (getenv "HOME")) "quicklisp"))
+         (quicklisp-path (when (file-exists-p quicklisp-home)
+                           (concat (file-name-as-directory quicklisp-home)
+                                   "setup.lisp")))
+         (agraph-client-path (getenv "AGRAPH_CLIENT"))
+         (agraph-smp-client-path (getenv "AGRAPH_SMP_CLIENT")))
 
-    (when (getenv "ACL_HOME")
+    (when (getenv "ALISP")
       (add-to-list 'slime-lisp-implementations
-                   (if agraph-client-path
-                       `(alisp (,(concat acl-path "alisp") "-L" ,quicklisp-path "-L" ,agraph-client-path))
-                     `(alisp (,(concat acl-path "alisp") "-L" ,quicklisp-path)))))
+                   `(alisp ,(remove nil
+                                    `(,(getenv "ALISP")
+                                      ,@(when quicklisp-path `("-L" ,quicklisp-path)))))))
 
-    (when (getenv "ACL_HOME")
+    (when (getenv "MLISP")
       (add-to-list 'slime-lisp-implementations
-                   (if agraph-client-path
-                       `(mlisp (,(concat acl-path "mlisp") "-L" ,quicklisp-path "-L" ,agraph-client-path))
-                     `(mlisp (,(concat acl-path "mlisp") "-L" ,quicklisp-path)))))
+                   `(mlisp ,(remove nil
+                                    `(,(getenv "MLISP")
+                                      ,@(when quicklisp-path `("-L" ,quicklisp-path))
+                                      ,@(when agraph-client-path `("-L" ,agraph-client-path)))))))
 
-    (when (getenv "ACL_SMP_HOME")
+    (when (getenv "ALISP_SMP")
       (add-to-list 'slime-lisp-implementations
-                   (if agraph-client-path
-                       `(alisp-smp (,(concat acl-smp-path "alisp") "-L" ,quicklisp-path "-L" ,agraph-smp-client-path))
-                     `(alisp (,(concat acl-smp-path "alisp") "-L" ,quicklisp-path)))))
+                   `(alisp-smp ,(remove nil
+                                        `(,(getenv "ALISP_SMP")
+                                          ,@(when quicklisp-path `("-L" ,quicklisp-path)))))))
 
-    (when (getenv "ACL_SMP_HOME")
+    (when (getenv "MLISP_SMP")
       (add-to-list 'slime-lisp-implementations
-                   (if agraph-client-path
-                       `(mlisp-smp (,(concat acl-smp-path "mlisp") "-L" ,quicklisp-path "-L" ,agraph-smp-client-path))
-                     `(mlisp (,(concat acl-smp-path "mlisp") "-L" ,quicklisp-path)))))
+                   `(mlisp-smp ,(remove nil
+                                        `(,(getenv "MLISP_SMP")
+                                          ,@(when quicklisp-path `("-L" ,quicklisp-path))
+                                          ,@(when agraph-smp-client-path `("-L" ,agraph-smp-client-path)))))))
 
     (when (executable-find "sbcl")
       (add-to-list 'slime-lisp-implementations
-                   `(sbcl ("sbcl" "--load" ,quicklisp-path))))
+                   (if quicklisp-path
+                       `(sbcl ("sbcl" "--load" ,quicklisp-path))
+                     `(sbcl ("sbcl" "--noinform")))))
 
     (when (executable-find "lx86cl64")
       (add-to-list 'slime-lisp-implementations
-                   `(ccl ("lx86cl64" "--load" ,quicklisp-path))))
+                   (if quicklisp-path
+                       `(ccl ("lx86cl64" "-load" ,quicklisp-path))
+                     `(ccl ("lx86cl64")))))
 
     (when (executable-find "lisp")
       (add-to-list 'slime-lisp-implementations
-                   `(cmucl ("lisp" "-load" ,quicklisp-path))))
+                   (if quicklisp-path
+                       `(cmucl ("lisp" "-load" ,quicklisp-path))
+                     `(cmucl ("lisp")))))
 
     (when (executable-find "ecl")
       (add-to-list 'slime-lisp-implementations
-                   `(ecl ("ecl" "--load" ,quicklisp-path)))))
+                   (if quicklisp-path
+                       `(ecl ("ecl" "-load" ,quicklisp-path))
+                     `(ecl ("ecl"))))))
 
   (let ((extras (when (require 'slime-company nil t)
                   '(slime-company))))
