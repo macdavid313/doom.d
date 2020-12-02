@@ -64,8 +64,7 @@
 (when (getenv "CL_DOCUMENTATION")
   (let* ((root (file-name-as-directory (getenv "CL_DOCUMENTATION")))
          (acl-doc-root (file-name-as-directory (concat root "allegro")))
-         (cltl2-root (file-name-as-directory (concat root "cltl")))
-         (hyperspec-root (file-name-as-directory (concat root "HyperSpec"))))
+         (cltl2-root (file-name-as-directory (concat root "cltl"))))
 
     (defun acl-doc ()
       "Quickly access AllegroCL Manual"
@@ -75,9 +74,7 @@
     (defun cltl2 ()
       "Quickly access Common Lisp the Language 2nd Edition"
       (interactive)
-      (eww-open-file (concat (file-name-as-directory (concat cltl2-root "clm")) "node1.html")))
-
-    (setq common-lisp-hyperspec-root (concat "file://" hyperspec-root))))
+      (eww-open-file (concat (file-name-as-directory (concat cltl2-root "clm")) "node1.html")))))
 
 (defun sbcl-doc ()
   "Quickly access SBCL Manual"
@@ -93,6 +90,14 @@
       :definition #'slime-edit-definition
       :documentation #'slime-describe-symbol))
   :config
+  (when (getenv "HYPERSPEC_ROOT")
+    (let* ((hyperspec-root (file-name-as-directory (getenv "HYPERSPEC_ROOT")))
+           (hyperspec-symbol-table (concat hyperspec-root "Data/Map_Sym.txt"))
+           (hyperspec-issuex-table (concat hyperspec-root "Data/Map_IssX.txt")))
+      (setq common-lisp-hyperspec-root hyperspec-root
+            common-lisp-hyperspec-symbol-table hyperspec-symbol-table
+            common-lisp-hyperspec-issuex-table hyperspec-issuex-table)))
+
   (setq slime-contribs
         '(slime-fancy slime-fuzzy slime-asdf slime-banner slime-company
                       slime-xref-browser slime-highlight-edits slime-scratch
@@ -261,11 +266,7 @@
          (:prefix ("t" . "trace")
           :desc "Toggle"         "t" #'slime-toggle-trace-fdefinition
           :desc "Toggle (fancy)" "T" #'slime-toggle-fancy-trace
-          :desc "Untrace all"    "u" #'slime-untrace-all)))
-
-  (when (featurep! :editor evil +everywhere)
-    (add-hook 'slime-mode-hook #'evil-normalize-keymaps)))
-
+          :desc "Untrace all"    "u" #'slime-untrace-all))))
 
 (use-package! slime-company
   :init (slime-setup '(slime-company))
