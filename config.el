@@ -58,7 +58,18 @@
 (setq projectile-indexing-method 'alien)
 (setq projectile-sort-order 'recentf)
 
-;;; Common Lisp - Slime
+;;; Common Lisp and Slime
+(eval-after-load 'autoinsert
+  '(define-auto-insert
+     '(lisp-mode . "Common Lisp Header")
+     '("Short description: "
+       (concat ";; -*- mode: Lisp; tab-width: 2 -*-\n;; "
+               (file-name-nondirectory (buffer-file-name))
+               "\n"
+               ";; \n"
+               ";; \n"
+               ";; See the file LICENSE for the full license governing this code.\n\n"))))
+
 (add-hook 'lisp-mode-hook #'rainbow-delimiters-mode)
 
 (when (getenv "CL_DOCUMENTATION")
