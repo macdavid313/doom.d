@@ -172,7 +172,7 @@
     (when (executable-find "lx86cl64")
       (add-to-list 'slime-lisp-implementations
                    (if quicklisp-path
-                       `(ccl ("lx86cl64" "-load" ,quicklisp-path))
+                       `(ccl ("lx86cl64" "--load" ,quicklisp-path))
                      `(ccl ("lx86cl64")))))
 
     (when (executable-find "lisp")
