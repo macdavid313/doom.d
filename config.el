@@ -36,7 +36,6 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -54,9 +53,53 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+(setq-default
+ delete-by-moving-to-trash t                      ; Delete files to trash
+ window-combination-resize t                      ; take new window space from all other windows (not just current)
+ x-stretch-cursor t)                              ; Stretch cursor to the glyph width
+
+(setq undo-limit 80000000                         ; Raise undo-limit to 80Mb
+      evil-want-fine-undo t                       ; By default while in insert all changes are one big blob. Be more granular
+      auto-save-default t                         ; Nobody likes to loose work, I certainly don't
+      truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
+
+;; Enable time in the mode-line
+(display-time-mode 1)
+
+;; Iterate through CamelCase words
+(global-subword-mode 1)
+
+;; ** Start maximised/fullscreen (cross-platf)
+(add-hook 'window-setup-hook
+          (if (eq initial-window-system 'x)
+              'toggle-frame-maximized
+            'toggle-frame-fullscreen)
+          t)
+
+;; slightly nicer default buffer names
+(setq doom-fallback-buffer-name "► Doom"
+      +doom-dashboard-name "► Doom")
+
+;; ** Don't ask to quit
+(setq confirm-kill-emacs nil)
+
+;;; line number
+(setq display-line-numbers-type 'relative)
+
 ;;; Projectile
 (setq projectile-indexing-method 'alien)
 (setq projectile-sort-order 'recentf)
+
+;;; company
+(use-package! company
+  :config
+  (setq company-idle-delay 0.5
+        company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+  ;; make aborting less annoying.
+  (add-hook 'evil-normal-state-entry-hook #'company-abort)
+  (setq-default history-length 1000)
+  (setq-default prescient-history-length 1000))
 
 ;;; Common Lisp and Slime
 (eval-after-load 'autoinsert
