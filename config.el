@@ -107,6 +107,13 @@ Version 2017-11-10"
 (setq projectile-indexing-method 'alien)
 (setq projectile-sort-order 'recentf)
 
+;;; Set the minimum characters to 3 before a search is fired
+(after! ivy
+  (setq ivy-more-chars-alist '((counsel-grep . 3)
+                               (counsel-rg . 3)
+                               (counsel-search . 3)
+                               (t . 3))))
+
 ;;; company
 (use-package! company
   :config
