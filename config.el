@@ -118,6 +118,12 @@ Version 2017-11-10"
   (setq-default history-length 1000)
   (setq-default prescient-history-length 1000))
 
+;;; LSP
+(add-hook 'lsp-mode-hook
+          (lambda ()
+            (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.venv\\'")
+            (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]venv\\'")))
+
 ;;; Common Lisp and Slime
 (eval-after-load 'autoinsert
   '(define-auto-insert
