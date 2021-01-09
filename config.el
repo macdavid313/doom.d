@@ -66,6 +66,20 @@
 ;; Enable time in the mode-line
 (display-time-mode 1)
 
+(setq display-time-world-list
+      '(("America/Los_Angeles" "San Francisco")
+        ("Asia/Bangkok" "Bangkok")
+        ("Europe/Kiev" "Kiev")
+        ("Asia/Tokyo" "Tokyo")))
+
+(defun display-time-world-minibuffer ()
+  "Like `display-time-world', but just display it in the minibuffer."
+  (interactive)
+  (message
+   (with-temp-buffer
+     (display-time-world-display display-time-world-list)
+     (buffer-string))))
+
 ;; Iterate through CamelCase words
 (global-subword-mode 1)
 
