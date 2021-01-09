@@ -65,6 +65,7 @@
 
 ;; Enable time in the mode-line
 (display-time-mode 1)
+(setq display-time-format "%R%p (%Z)")
 
 (setq display-time-world-list
       '(("America/Los_Angeles" "San Francisco")
