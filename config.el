@@ -210,7 +210,7 @@ Version 2017-11-10"
   ;; slime-completion-at-point-functions 'slime-simple-completions)
 
   (set-popup-rules!
-    '(("^\\*slime-repl"       :vslot 2 :size 0.3 :quit nil :ttl nil)
+    '(("^\\*slime-repl"        :vslot 2 :size 0.3 :quit nil :ttl nil)
       ("^\\*slime-compilation" :vslot 3 :ttl nil)
       ("^\\*slime-traces"      :vslot 4 :ttl nil)
       ("^\\*slime-description" :vslot 5 :size 0.3 :ttl 0)
@@ -289,7 +289,9 @@ Version 2017-11-10"
               ;; We tell slime to not load failed compiled code
               (setq slime-load-failed-fasl 'never)))
 
+  ;; for Allegro CL source code
   (add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
+
   (add-hook 'lisp-mode-hook (lambda ()
                               (unless (featurep 'slime)
                                 (require 'slime)
@@ -390,6 +392,35 @@ Version 2017-11-10"
 (add-to-list 'auto-mode-alist '("\\.ss\\'"  . scheme-mode))
 (add-to-list 'auto-mode-alist '("\\.scm\\'" . scheme-mode))
 (add-to-list 'auto-mode-alist '("\\.rkt\\'" . scheme-mode))
+
+;;;; Paredit
+(use-package! paredit
+  :config
+  ;; hook lisp modes
+  (add-hook 'emacs-lisp-mode-hook       #'enable-paredit-mode)
+  (add-hook 'eval-expression-minibuffer-setup-hook #'enable-paredit-mode)
+  (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
+  (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
+  (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+  (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))
+  ;; Electric RETURN
+  (defvar electrify-return-match
+    "[\]}\)\"]"
+    "If this regexp matches the text after the cursor, do an \"electric\"
+  return.")
+  (defun electrify-return-if-match (arg)
+    "If the text after the cursor matches `electrify-return-match' then
+  open and indent an empty line between the cursor and the text.  Move the
+  cursor to the new line."
+    (interactive "P")
+    (let ((case-fold-search nil))
+      (if (looking-at electrify-return-match)
+      (save-excursion (newline-and-indent)))
+      (newline arg)
+      (indent-according-to-mode)))
+  ;; Using local-set-key in a mode-hook is a better idea.
+  (global-set-key (kbd "RET") 'electrify-return-if-match))
 
 ;;;; IRC Chat
 (after! circe
