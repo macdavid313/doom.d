@@ -398,5 +398,5 @@ Version 2017-11-10"
                      :port 6697
                      :nick "macdavid313"
                      :sasl-username "macdavid313"
-                     :sasl-password ,(+pass-get-secret "irc/freenode.net")
+                     :sasl-password ,(+pass-get-secret "freenode.net/macdavid313")
                      :channels ("#lisp"))))
