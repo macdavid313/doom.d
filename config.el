@@ -160,6 +160,9 @@ Version 2017-11-10"
 
 (add-hook 'lisp-mode-hook #'rainbow-delimiters-mode)
 
+;; for Allegro CL source code
+(add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
+
 (when (getenv "CL_DOCUMENTATION")
   (let* ((root (file-name-as-directory (getenv "CL_DOCUMENTATION")))
          (acl-doc-root (file-name-as-directory (concat root "allegro")))
@@ -197,17 +200,20 @@ Version 2017-11-10"
             common-lisp-hyperspec-symbol-table hyperspec-symbol-table
             common-lisp-hyperspec-issuex-table hyperspec-issuex-table)))
 
-  (setq slime-contribs
-        '(slime-fancy slime-fuzzy slime-asdf slime-banner slime-company
-                      slime-xref-browser slime-highlight-edits slime-scratch
-                      slime-trace-dialog slime-mdot-fu))
-
   (setf slime-repl-history-file (concat doom-cache-dir "slime-repl-history")
         slime-kill-without-query-p t
         slime-default-lisp 'sbcl
         slime-protocol-version 'ignore
-        slime-net-coding-system 'utf-8-unix)
+        slime-net-coding-system 'utf-8-unix
+        slime-load-failed-fasl 'never)
   ;; slime-completion-at-point-functions 'slime-simple-completions)
+
+  (local-set-key [tab] 'slime-complete-symbol)
+  (local-set-key (kbd "M-q") 'slime-reindent-defun)
+
+  ;; fix indentation for `if*' when using keyword forms
+  (setq common-lisp-indent-if*-keyword
+        (rx (? ":") (or "else" "elseif" "then")))
 
   (set-popup-rules!
     '(("^\\*slime-repl"        :vslot 2 :size 0.3 :quit nil :ttl nil)
@@ -274,28 +280,6 @@ Version 2017-11-10"
                    (if quicklisp-path
                        `(ecl ("ecl" "-load" ,quicklisp-path))
                      `(ecl ("ecl"))))))
-
-  (let ((extras (when (require 'slime-company nil t)
-                  '(slime-company))))
-    (slime-setup (append '(slime-repl slime-fuzzy) extras)))
-
-  (add-hook 'slime-mode-hook
-            (lambda ()
-              (interactive)
-              ;; Start slime mode (slime-mode)
-              ;; Some useful key-bindings
-              (local-set-key [tab] 'slime-complete-symbol)
-              (local-set-key (kbd "M-q") 'slime-reindent-defun)
-              ;; We tell slime to not load failed compiled code
-              (setq slime-load-failed-fasl 'never)))
-
-  ;; for Allegro CL source code
-  (add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
-
-  (add-hook 'lisp-mode-hook (lambda ()
-                              (unless (featurep 'slime)
-                                (require 'slime)
-                                (normal-mode))))
 
   (map! (:map slime-db-mode-map
          :n "gr" #'slime-db-restart-frame)
@@ -370,8 +354,13 @@ Version 2017-11-10"
           :desc "Untrace all"    "u" #'slime-untrace-all))))
 
 (use-package! slime-company
-  :init (slime-setup '(slime-company))
+  :after (slime company)
+  :init (slime-setup '(slime-fancy slime-company slime-fuzzy
+                                   slime-asdf slime-banner slime-xref-browser slime-scratch
+                                   slime-trace-dialog slime-mdot-fu))
   :config
+  (setq slime-company-completion 'fuzzy
+        slime-company-after-completion 'slime-company-just-one-space)
   (define-key company-active-map (kbd "\C-n") 'company-select-next)
   (define-key company-active-map (kbd "\C-p") 'company-select-previous)
   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
@@ -403,7 +392,6 @@ Version 2017-11-10"
   (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
   (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
   (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
-  (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))
   ;; Electric RETURN
   (defvar electrify-return-match
     "[\]}\)\"]"
