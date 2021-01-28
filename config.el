@@ -366,21 +366,15 @@ Version 2017-11-10"
   (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
   (define-key company-active-map (kbd "M-.") 'company-show-location))
 
-;;;; Scheme and Geiser
-(add-to-list 'auto-mode-alist '("\\.ss\\'"  . geiser-mode))
-(add-to-list 'auto-mode-alist '("\\.scm\\'" . geiser-mode))
-(add-to-list 'auto-mode-alist '("\\.rkt\\'" . geiser-mode))
+;;;; Racket
+;; (add-to-list 'auto-mode-alist '("\\.rkt\\'" . racket-mode))
 
-(let ((scheme (or (executable-find "scheme") (executable-find "chez"))))
-  (when scheme
-    (setq geiser-chez-binary scheme)))
+(after! racket-mode
+  (add-hook! racket-mode
+             #'racket-smart-open-bracket-mode))
 
-(setq geiser-repl-autodoc-p t
-      geiser-active-implementations '(chez))
-
-(add-to-list 'auto-mode-alist '("\\.ss\\'"  . scheme-mode))
-(add-to-list 'auto-mode-alist '("\\.scm\\'" . scheme-mode))
-(add-to-list 'auto-mode-alist '("\\.rkt\\'" . scheme-mode))
+(add-hook 'racket-mode-hook      #'racket-unicode-input-method-enable)
+(add-hook 'racket-repl-mode-hook #'racket-unicode-input-method-enable)
 
 ;;;; Paredit
 (use-package! paredit
@@ -391,7 +385,7 @@ Version 2017-11-10"
   (add-hook 'ielm-mode-hook             #'enable-paredit-mode)
   (add-hook 'lisp-mode-hook             #'enable-paredit-mode)
   (add-hook 'lisp-interaction-mode-hook #'enable-paredit-mode)
-  (add-hook 'scheme-mode-hook           #'enable-paredit-mode)
+  (add-hook 'racket-mode-hook           #'enable-paredit-mode)
   ;; Electric RETURN
   (defvar electrify-return-match
     "[\]}\)\"]"
