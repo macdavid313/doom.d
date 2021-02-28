@@ -184,6 +184,7 @@ Version 2017-11-10"
   (eww-browse-url "http://www.sbcl.org/manual/index.html"))
 
 (use-package! slime
+  :hook (lisp-mode-local-vars . slime-editing-mode)
   :init
   (after! lisp-mode
     (set-repl-handler! 'lisp-mode #'slime-repl)
@@ -205,8 +206,8 @@ Version 2017-11-10"
         slime-default-lisp 'sbcl
         slime-protocol-version 'ignore
         slime-net-coding-system 'utf-8-unix
-        slime-load-failed-fasl 'never)
-  ;; slime-completion-at-point-functions 'slime-simple-completions)
+        slime-load-failed-fasl 'never
+        slime-completion-at-point-functions 'slime-fuzzy-complete-symbol)
 
   (local-set-key [tab] 'slime-complete-symbol)
   (local-set-key (kbd "M-q") 'slime-reindent-defun)
@@ -351,7 +352,10 @@ Version 2017-11-10"
          (:prefix ("t" . "trace")
           :desc "Toggle"         "t" #'slime-toggle-trace-fdefinition
           :desc "Toggle (fancy)" "T" #'slime-toggle-fancy-trace
-          :desc "Untrace all"    "u" #'slime-untrace-all))))
+          :desc "Untrace all"    "u" #'slime-untrace-all)))
+
+  (when (featurep! :editor evil +everywhere)
+    (add-hook 'slime-mode-hook #'evil-normalize-keymaps)))
 
 (use-package! slime-company
   :after (slime company)
