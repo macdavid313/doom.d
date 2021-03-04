@@ -424,3 +424,8 @@ Version 2017-11-10"
                      :sasl-username "macdavid313"
                      :sasl-password ,(+pass-get-secret "freenode.net/macdavid313")
                      :channels ("#lisp"))))
+
+;;;; RSS
+(after! elfeed
+  (elfeed-load-opml (concat (getenv "HOME") "/Documents/feedly.opml"))
+  (add-hook!'elfeed-search-mode-hook 'elfeed-update))
