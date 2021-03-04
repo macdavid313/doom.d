@@ -146,6 +146,13 @@ Version 2017-11-10"
             (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.venv\\'")
             (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]venv\\'")))
 
+;;; Rust
+(after! rustic
+  (setq rustic-spinner-type 'half-circle
+        lsp-rust-analyzer-cargo-watch-command "clippy"
+        lsp-eldoc-render-all t
+        lsp-rust-analyzer-server-display-inlay-hints t))
+
 ;;; Common Lisp and Slime
 (eval-after-load 'autoinsert
   '(define-auto-insert
