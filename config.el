@@ -150,7 +150,7 @@ Version 2017-11-10"
 (after! rustic
   (setq rustic-spinner-type 'half-circle
         lsp-rust-analyzer-cargo-watch-command "clippy"
-        lsp-eldoc-render-all t
+        ;; lsp-eldoc-render-all t
         lsp-rust-analyzer-server-display-inlay-hints t))
 
 ;;; Common Lisp and Slime
