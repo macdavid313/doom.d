@@ -235,9 +235,7 @@ Version 2017-11-10"
   (let* ((quicklisp-home (concat (file-name-as-directory (getenv "HOME")) "quicklisp"))
          (quicklisp-path (when (file-exists-p quicklisp-home)
                            (concat (file-name-as-directory quicklisp-home)
-                                   "setup.lisp")))
-         (agraph-client-path (getenv "AGRAPH_CLIENT"))
-         (agraph-smp-client-path (getenv "AGRAPH_SMP_CLIENT")))
+                                   "setup.lisp"))))
 
     (when (getenv "ALISP")
       (add-to-list 'slime-lisp-implementations
@@ -249,8 +247,7 @@ Version 2017-11-10"
       (add-to-list 'slime-lisp-implementations
                    `(mlisp ,(remove nil
                                     `(,(getenv "MLISP")
-                                      ,@(when quicklisp-path `("-L" ,quicklisp-path))
-                                      ,@(when agraph-client-path `("-L" ,agraph-client-path)))))))
+                                      ,@(when quicklisp-path `("-L" ,quicklisp-path)))))))
 
     (when (getenv "ALISP_SMP")
       (add-to-list 'slime-lisp-implementations
@@ -262,8 +259,7 @@ Version 2017-11-10"
       (add-to-list 'slime-lisp-implementations
                    `(mlisp-smp ,(remove nil
                                         `(,(getenv "MLISP_SMP")
-                                          ,@(when quicklisp-path `("-L" ,quicklisp-path))
-                                          ,@(when agraph-smp-client-path `("-L" ,agraph-smp-client-path)))))))
+                                          ,@(when quicklisp-path `("-L" ,quicklisp-path)))))))
 
     (when (executable-find "sbcl")
       (add-to-list 'slime-lisp-implementations
