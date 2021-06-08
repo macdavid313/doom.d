@@ -175,8 +175,8 @@
 
        :app
        ;;calendar
-       irc               ; how neckbeards socialize
-       rss        ; emacs as an RSS reader
+       ;;irc               ; how neckbeards socialize
+       ;;rss        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config

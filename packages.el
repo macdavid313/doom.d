@@ -52,3 +52,4 @@
 (package! paredit)
 (package! slime)
 (package! slime-company)
+(package! sparql-mode)

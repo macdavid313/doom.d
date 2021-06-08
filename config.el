@@ -411,17 +411,9 @@ Version 2017-11-10"
   ;; Using local-set-key in a mode-hook is a better idea.
   (global-set-key (kbd "RET") 'electrify-return-if-match))
 
-;;;; IRC Chat
-(after! circe
-  (set-irc-server! "chat.freenode.net"
-                   `(:tls t
-                     :port 6697
-                     :nick "macdavid313"
-                     :sasl-username "macdavid313"
-                     :sasl-password ,(+pass-get-secret "freenode.net/macdavid313")
-                     :channels ("#lisp"))))
-
-;;;; RSS
-(after! elfeed
-  (elfeed-load-opml (concat (getenv "HOME") "/Documents/feedly.opml"))
-  (add-hook!'elfeed-search-mode-hook 'elfeed-update))
+;;;; SPARQL-MODE
+(use-package! sparql-mode
+  :config
+  (add-hook 'auto-mode-alist '("\\.sparql$" . sparql-mode))
+  (add-to-list 'auto-mode-alist '("\\.rq$" . sparql-mode))
+  (add-hook 'sparql-mode-hook 'company-mode))
